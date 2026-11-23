@@ -15,6 +15,8 @@ import { GlassCard } from '../components/GlassCard';
 import { GlassModal } from '../components/GlassModal';
 import { CourseSyllabus, SubjectItem } from '../types';
 import { createId } from '../data/syllabusTemplates';
+import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
+
 
 interface SyllabusScreenProps {
   courses: CourseSyllabus[];
