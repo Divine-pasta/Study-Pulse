@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { ThemeMode } from '../types';
 import { DARK_PALETTE, LIGHT_PALETTE, ThemePalette } from './colors';
+import { LayoutAnimation, Platform, UIManager } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface ThemeContextValue {
   mode: ThemeMode;
