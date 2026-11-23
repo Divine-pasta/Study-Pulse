@@ -17,7 +17,6 @@ import { CourseSyllabus, SubjectItem } from '../types';
 import { createId } from '../data/syllabusTemplates';
 import { useResponsiveLayout } from '../hooks/useResponsiveLayout';
 
-
 interface SyllabusScreenProps {
   courses: CourseSyllabus[];
   activeCourse: CourseSyllabus;
@@ -520,7 +519,7 @@ export const SyllabusScreen: React.FC<SyllabusScreenProps> = ({
             </View>
           </View>
 
-          {/* Per-Subject Breakdown */}
+          {/* Per-Subject Breakdown (Part 4) */}
           {stats.subjectBreakdowns.length > 0 && (
             <View style={[styles.breakdownWrap, { borderTopColor: colors.divider }]}>
               <Text style={[styles.breakdownTitle, { color: colors.textSecondary }]}>
@@ -559,7 +558,6 @@ export const SyllabusScreen: React.FC<SyllabusScreenProps> = ({
               </View>
             </View>
           )}
-
         </GlassCard>
 
         {/* Search & Status Filter Bar */}
@@ -675,264 +673,308 @@ export const SyllabusScreen: React.FC<SyllabusScreenProps> = ({
             </View>
           </GlassCard>
         ) : (
-          filteredSubjects.map((subject) => {
-            const subjExpanded = isFiltering || Boolean(expandedSubjects[subject.id]);
-            let subjTotal = 0;
-            let subjMastered = 0;
-            let subjWeighted = 0;
-            for (const c of subject.chapters) {
-              for (const t of c.topics) {
-                const st = resolveTopicStatus(t as { status?: StudyStatus; completed?: boolean });
-                subjTotal += 1;
-                subjWeighted += STATUS_META[st].weight;
-                if (st === 'mastered') subjMastered += 1;
+          <View style={styles.subjectsGrid}>
+            {filteredSubjects.map((subject) => {
+              const subjExpanded = isFiltering || Boolean(expandedSubjects[subject.id]);
+              let subjTotal = 0;
+              let subjMastered = 0;
+              let subjWeighted = 0;
+              for (const c of subject.chapters) {
+                for (const t of c.topics) {
+                  const st = resolveTopicStatus(
+                    t as { status?: StudyStatus; completed?: boolean }
+                  );
+                  subjTotal += 1;
+                  subjWeighted += STATUS_META[st].weight;
+                  if (st === 'mastered') subjMastered += 1;
+                }
               }
-            }
-            const subjPct = subjTotal === 0 ? 0 : Math.round((subjWeighted / subjTotal) * 100);
+              const subjPct = subjTotal === 0 ? 0 : Math.round((subjWeighted / subjTotal) * 100);
 
-            return (
-              <GlassCard key={subject.id} style={styles.subjectCard} contentStyle={styles.noPad}>
-                {/* Subject Header */}
-                <Pressable
-                  onPress={() => toggleSubjectExpand(subject.id)}
-                  style={styles.subjectHeader}
+              return (
+                <View
+                  key={subject.id}
+                  style={{ width: layout.subjectColumns === 2 ? '49%' : '100%' }}
                 >
-                  <View style={[styles.colorBar, { backgroundColor: subject.color }]} />
-                  <View style={styles.flex1}>
-                    <Text style={[styles.subjectName, { color: colors.textPrimary }]}>
-                      {subject.name}
-                    </Text>
-                    <Text style={[styles.subjectMeta, { color: colors.textSecondary }]}>
-                      {subjMastered}/{subjTotal} mastered • {subjPct}%
-                    </Text>
-                  </View>
-
-                  <View style={styles.iconActions}>
+                  <GlassCard style={styles.subjectCard} contentStyle={styles.noPad}>
+                    {/* Subject Header */}
                     <Pressable
-                      onPress={() =>
-                        openEditor(
-                          { type: 'EDIT_SUBJECT', subjectId: subject.id, currentName: subject.name },
-                          subject.name
-                        )
-                      }
-                      hitSlop={8}
-                      style={styles.miniAction}
+                      onPress={() => toggleSubjectExpand(subject.id)}
+                      style={styles.subjectHeader}
                     >
-                      <Ionicons name="pencil" size={15} color={colors.textSecondary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => confirmDeleteSubject(subject.id, subject.name)}
-                      hitSlop={8}
-                      style={styles.miniAction}
-                    >
-                      <Ionicons name="trash-outline" size={15} color={colors.danger} />
-                    </Pressable>
-                    <Ionicons
-                      name={subjExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={18}
-                      color={colors.textSecondary}
-                    />
-                  </View>
-                </Pressable>
+                      <View style={[styles.colorBar, { backgroundColor: subject.color }]} />
+                      <View style={styles.flex1}>
+                        <Text style={[styles.subjectName, { color: colors.textPrimary }]}>
+                          {subject.name}
+                        </Text>
+                        <Text style={[styles.subjectMeta, { color: colors.textSecondary }]}>
+                          {subjMastered}/{subjTotal} mastered • {subjPct}%
+                        </Text>
+                      </View>
 
-                {/* Expanded Chapters */}
-                {subjExpanded && (
-                  <View style={[styles.chaptersWrap, { borderTopColor: colors.divider }]}>
-                    {subject.chapters.map((chapter) => {
-                      const chapExpanded = isFiltering || Boolean(expandedChapters[chapter.id]);
-                      const chapTotal = chapter.topics.length;
-                      let chapWeighted = 0;
-                      for (const t of chapter.topics) {
-                        const st = resolveTopicStatus(
-                          t as { status?: StudyStatus; completed?: boolean }
-                        );
-                        chapWeighted += STATUS_META[st].weight;
-                      }
-                      const chapPct =
-                        chapTotal === 0 ? 0 : Math.round((chapWeighted / chapTotal) * 100);
-
-                      return (
-                        <View
-                          key={chapter.id}
-                          style={[styles.chapterBox, { backgroundColor: colors.inputBg }]}
+                      <View style={styles.iconActions}>
+                        <Pressable
+                          onPress={() =>
+                            openEditor(
+                              {
+                                type: 'EDIT_SUBJECT',
+                                subjectId: subject.id,
+                                currentName: subject.name,
+                              },
+                              subject.name
+                            )
+                          }
+                          hitSlop={8}
+                          style={styles.miniAction}
                         >
-                          <Pressable
-                            onPress={() => toggleChapterExpand(chapter.id)}
-                            style={styles.chapterHeader}
-                          >
-                            <Ionicons
-                              name={chapExpanded ? 'folder-open' : 'folder'}
-                              size={16}
-                              color={subject.color}
-                            />
-                            <View style={styles.flex1}>
-                              <Text style={[styles.chapterTitle, { color: colors.textPrimary }]}>
-                                {chapter.title}
-                              </Text>
-                              <Text style={[styles.chapterMeta, { color: colors.textSecondary }]}>
-                                {chapPct}% mastery • {chapTotal} topics
-                              </Text>
-                            </View>
-
-                            <View style={styles.iconActions}>
-                              <Pressable
-                                onPress={() =>
-                                  openEditor(
-                                    {
-                                      type: 'EDIT_CHAPTER',
-                                      subjectId: subject.id,
-                                      chapterId: chapter.id,
-                                      currentTitle: chapter.title,
-                                    },
-                                    chapter.title
-                                  )
-                                }
-                                hitSlop={6}
-                                style={styles.miniAction}
-                              >
-                                <Ionicons name="pencil" size={14} color={colors.textSecondary} />
-                              </Pressable>
-                              <Pressable
-                                onPress={() =>
-                                  confirmDeleteChapter(subject.id, chapter.id, chapter.title)
-                                }
-                                hitSlop={6}
-                                style={styles.miniAction}
-                              >
-                                <Ionicons name="trash-outline" size={14} color={colors.danger} />
-                              </Pressable>
-                              <Ionicons
-                                name={chapExpanded ? 'chevron-up' : 'chevron-down'}
-                                size={16}
-                                color={colors.textSecondary}
-                              />
-                            </View>
-                          </Pressable>
-
-                          {chapExpanded && (
-                            <View style={styles.topicsList}>
-                              {chapter.topics.map((topic) => {
-                                const st = resolveTopicStatus(
-                                  topic as { status?: StudyStatus; completed?: boolean }
-                                );
-                                const meta = STATUS_META[st];
-                                const isMastered = st === 'mastered';
-
-                                return (
-                                  <View
-                                    key={topic.id}
-                                    style={[styles.topicRow, { borderTopColor: colors.divider }]}
-                                  >
-                                    <Pressable
-                                      onPress={() =>
-                                        cycleTopicStatus(subject.id, chapter.id, topic.id)
-                                      }
-                                      style={styles.topicCheckArea}
-                                    >
-                                      <Ionicons name={meta.icon} size={20} color={meta.color} />
-                                      <View style={styles.flex1}>
-                                        <Text
-                                          style={[
-                                            styles.topicTitle,
-                                            {
-                                              color: isMastered
-                                                ? colors.textMuted
-                                                : colors.textPrimary,
-                                              textDecorationLine: isMastered
-                                                ? 'line-through'
-                                                : 'none',
-                                            },
-                                          ]}
-                                        >
-                                          {topic.title}
-                                        </Text>
-                                        <Text style={[styles.statusTag, { color: meta.color }]}>
-                                          {meta.label} • Tap to cycle
-                                        </Text>
-                                      </View>
-                                    </Pressable>
-
-                                    <View style={styles.iconActions}>
-                                      <Pressable
-                                        onPress={() =>
-                                          openEditor(
-                                            {
-                                              type: 'EDIT_TOPIC',
-                                              subjectId: subject.id,
-                                              chapterId: chapter.id,
-                                              topicId: topic.id,
-                                              currentTitle: topic.title,
-                                            },
-                                            topic.title
-                                          )
-                                        }
-                                        hitSlop={6}
-                                        style={styles.miniAction}
-                                      >
-                                        <Ionicons
-                                          name="pencil"
-                                          size={13}
-                                          color={colors.textSecondary}
-                                        />
-                                      </Pressable>
-                                      <Pressable
-                                        onPress={() =>
-                                          deleteTopic(subject.id, chapter.id, topic.id)
-                                        }
-                                        hitSlop={6}
-                                        style={styles.miniAction}
-                                      >
-                                        <Ionicons
-                                          name="close-circle-outline"
-                                          size={15}
-                                          color={colors.danger}
-                                        />
-                                      </Pressable>
-                                    </View>
-                                  </View>
-                                );
-                              })}
-
-                              <Pressable
-                                onPress={() =>
-                                  openEditor({
-                                    type: 'ADD_TOPIC',
-                                    subjectId: subject.id,
-                                    chapterId: chapter.id,
-                                  })
-                                }
-                                style={styles.inlineAddBtn}
-                              >
-                                <Ionicons name="add" size={15} color={colors.accentPrimary} />
-                                <Text
-                                  style={[styles.inlineAddText, { color: colors.accentPrimary }]}
-                                >
-                                  Add Topic
-                                </Text>
-                              </Pressable>
-                            </View>
-                          )}
-                        </View>
-                      );
-                    })}
-
-                    <Pressable
-                      onPress={() => openEditor({ type: 'ADD_CHAPTER', subjectId: subject.id })}
-                      style={[
-                        styles.addChapterBtn,
-                        { borderColor: colors.divider, backgroundColor: colors.inputBg },
-                      ]}
-                    >
-                      <Ionicons name="add-circle-outline" size={16} color={colors.accentPrimary} />
-                      <Text style={[styles.addChapterText, { color: colors.accentPrimary }]}>
-                        Add Chapter to {subject.name}
-                      </Text>
+                          <Ionicons name="pencil" size={15} color={colors.textSecondary} />
+                        </Pressable>
+                        <Pressable
+                          onPress={() => confirmDeleteSubject(subject.id, subject.name)}
+                          hitSlop={8}
+                          style={styles.miniAction}
+                        >
+                          <Ionicons name="trash-outline" size={15} color={colors.danger} />
+                        </Pressable>
+                        <Ionicons
+                          name={subjExpanded ? 'chevron-up' : 'chevron-down'}
+                          size={18}
+                          color={colors.textSecondary}
+                        />
+                      </View>
                     </Pressable>
-                  </View>
-                )}
-              </GlassCard>
-            );
-          })
+
+                    {/* Expanded Chapters */}
+                    {subjExpanded && (
+                      <View style={[styles.chaptersWrap, { borderTopColor: colors.divider }]}>
+                        {subject.chapters.map((chapter) => {
+                          const chapExpanded =
+                            isFiltering || Boolean(expandedChapters[chapter.id]);
+                          const chapTotal = chapter.topics.length;
+                          let chapWeighted = 0;
+                          for (const t of chapter.topics) {
+                            const st = resolveTopicStatus(
+                              t as { status?: StudyStatus; completed?: boolean }
+                            );
+                            chapWeighted += STATUS_META[st].weight;
+                          }
+                          const chapPct =
+                            chapTotal === 0 ? 0 : Math.round((chapWeighted / chapTotal) * 100);
+
+                          return (
+                            <View
+                              key={chapter.id}
+                              style={[styles.chapterBox, { backgroundColor: colors.inputBg }]}
+                            >
+                              <Pressable
+                                onPress={() => toggleChapterExpand(chapter.id)}
+                                style={styles.chapterHeader}
+                              >
+                                <Ionicons
+                                  name={chapExpanded ? 'folder-open' : 'folder'}
+                                  size={16}
+                                  color={subject.color}
+                                />
+                                <View style={styles.flex1}>
+                                  <Text
+                                    style={[styles.chapterTitle, { color: colors.textPrimary }]}
+                                  >
+                                    {chapter.title}
+                                  </Text>
+                                  <Text
+                                    style={[styles.chapterMeta, { color: colors.textSecondary }]}
+                                  >
+                                    {chapPct}% mastery • {chapTotal} topics
+                                  </Text>
+                                </View>
+
+                                <View style={styles.iconActions}>
+                                  <Pressable
+                                    onPress={() =>
+                                      openEditor(
+                                        {
+                                          type: 'EDIT_CHAPTER',
+                                          subjectId: subject.id,
+                                          chapterId: chapter.id,
+                                          currentTitle: chapter.title,
+                                        },
+                                        chapter.title
+                                      )
+                                    }
+                                    hitSlop={6}
+                                    style={styles.miniAction}
+                                  >
+                                    <Ionicons
+                                      name="pencil"
+                                      size={14}
+                                      color={colors.textSecondary}
+                                    />
+                                  </Pressable>
+                                  <Pressable
+                                    onPress={() =>
+                                      confirmDeleteChapter(
+                                        subject.id,
+                                        chapter.id,
+                                        chapter.title
+                                      )
+                                    }
+                                    hitSlop={6}
+                                    style={styles.miniAction}
+                                  >
+                                    <Ionicons
+                                      name="trash-outline"
+                                      size={14}
+                                      color={colors.danger}
+                                    />
+                                  </Pressable>
+                                  <Ionicons
+                                    name={chapExpanded ? 'chevron-up' : 'chevron-down'}
+                                    size={16}
+                                    color={colors.textSecondary}
+                                  />
+                                </View>
+                              </Pressable>
+
+                              {chapExpanded && (
+                                <View style={styles.topicsList}>
+                                  {chapter.topics.map((topic) => {
+                                    const st = resolveTopicStatus(
+                                      topic as { status?: StudyStatus; completed?: boolean }
+                                    );
+                                    const meta = STATUS_META[st];
+                                    const isMastered = st === 'mastered';
+
+                                    return (
+                                      <View
+                                        key={topic.id}
+                                        style={[
+                                          styles.topicRow,
+                                          { borderTopColor: colors.divider },
+                                        ]}
+                                      >
+                                        <Pressable
+                                          onPress={() =>
+                                            cycleTopicStatus(subject.id, chapter.id, topic.id)
+                                          }
+                                          style={styles.topicCheckArea}
+                                        >
+                                          <Ionicons
+                                            name={meta.icon}
+                                            size={20}
+                                            color={meta.color}
+                                          />
+                                          <View style={styles.flex1}>
+                                            <Text
+                                              style={[
+                                                styles.topicTitle,
+                                                {
+                                                  color: isMastered
+                                                    ? colors.textMuted
+                                                    : colors.textPrimary,
+                                                  textDecorationLine: isMastered
+                                                    ? 'line-through'
+                                                    : 'none',
+                                                },
+                                              ]}
+                                            >
+                                              {topic.title}
+                                            </Text>
+                                            <Text style={[styles.statusTag, { color: meta.color }]}>
+                                              {meta.label} • Tap to cycle
+                                            </Text>
+                                          </View>
+                                        </Pressable>
+
+                                        <View style={styles.iconActions}>
+                                          <Pressable
+                                            onPress={() =>
+                                              openEditor(
+                                                {
+                                                  type: 'EDIT_TOPIC',
+                                                  subjectId: subject.id,
+                                                  chapterId: chapter.id,
+                                                  topicId: topic.id,
+                                                  currentTitle: topic.title,
+                                                },
+                                                topic.title
+                                              )
+                                            }
+                                            hitSlop={6}
+                                            style={styles.miniAction}
+                                          >
+                                            <Ionicons
+                                              name="pencil"
+                                              size={13}
+                                              color={colors.textSecondary}
+                                            />
+                                          </Pressable>
+                                          <Pressable
+                                            onPress={() =>
+                                              deleteTopic(subject.id, chapter.id, topic.id)
+                                            }
+                                            hitSlop={6}
+                                            style={styles.miniAction}
+                                          >
+                                            <Ionicons
+                                              name="close-circle-outline"
+                                              size={15}
+                                              color={colors.danger}
+                                            />
+                                          </Pressable>
+                                        </View>
+                                      </View>
+                                    );
+                                  })}
+
+                                  <Pressable
+                                    onPress={() =>
+                                      openEditor({
+                                        type: 'ADD_TOPIC',
+                                        subjectId: subject.id,
+                                        chapterId: chapter.id,
+                                      })
+                                    }
+                                    style={styles.inlineAddBtn}
+                                  >
+                                    <Ionicons name="add" size={15} color={colors.accentPrimary} />
+                                    <Text
+                                      style={[
+                                        styles.inlineAddText,
+                                        { color: colors.accentPrimary },
+                                      ]}
+                                    >
+                                      Add Topic
+                                    </Text>
+                                  </Pressable>
+                                </View>
+                              )}
+                            </View>
+                          );
+                        })}
+
+                        <Pressable
+                          onPress={() => openEditor({ type: 'ADD_CHAPTER', subjectId: subject.id })}
+                          style={[
+                            styles.addChapterBtn,
+                            { borderColor: colors.divider, backgroundColor: colors.inputBg },
+                          ]}
+                        >
+                          <Ionicons
+                            name="add-circle-outline"
+                            size={16}
+                            color={colors.accentPrimary}
+                          />
+                          <Text style={[styles.addChapterText, { color: colors.accentPrimary }]}>
+                            Add Chapter to {subject.name}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    )}
+                  </GlassCard>
+                </View>
+              );
+            })}
+          </View>
         )}
       </ScrollView>
 
@@ -1072,8 +1114,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.9,
   },
+  breakdownGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
   breakdownRow: {
     gap: 4,
+    width: '100%',
+  },
+  breakdownRowHalf: {
+    width: '48.8%',
   },
   breakdownTop: {
     flexDirection: 'row',
@@ -1166,6 +1218,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     marginTop: 4,
+  },
+  subjectsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   subjectCard: {
     marginBottom: 12,
