@@ -424,7 +424,13 @@ export const SyllabusScreen: React.FC<SyllabusScreenProps> = ({
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: Math.max(insets.bottom, 12) + 92 },
+          {
+            paddingHorizontal: layout.horizontalPadding,
+            paddingBottom: Math.max(insets.bottom, 12) + 92,
+            maxWidth: layout.contentMaxWidth,
+            width: '100%',
+            alignSelf: 'center',
+          },
         ]}
       >
         {/* Course Switcher Pills (if multiple courses exist) */}
