@@ -105,6 +105,7 @@ export const SyllabusScreen: React.FC<SyllabusScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const layout = useResponsiveLayout();
 
   const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
