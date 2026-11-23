@@ -526,31 +526,40 @@ export const SyllabusScreen: React.FC<SyllabusScreenProps> = ({
               <Text style={[styles.breakdownTitle, { color: colors.textSecondary }]}>
                 SUBJECT PROGRESS
               </Text>
-              {stats.subjectBreakdowns.map((item) => (
-                <View key={item.id} style={styles.breakdownRow}>
-                  <View style={styles.breakdownTop}>
-                    <Text
-                      style={[styles.breakdownName, { color: colors.textPrimary }]}
-                      numberOfLines={1}
-                    >
-                      {item.name}
-                    </Text>
-                    <Text style={[styles.breakdownMeta, { color: colors.textSecondary }]}>
-                      {item.mastered}/{item.total} done • {item.percent}%
-                    </Text>
+              <View style={styles.breakdownGrid}>
+                {stats.subjectBreakdowns.map((item) => (
+                  <View
+                    key={item.id}
+                    style={[
+                      styles.breakdownRow,
+                      layout.breakdownColumns === 2 && styles.breakdownRowHalf,
+                    ]}
+                  >
+                    <View style={styles.breakdownTop}>
+                      <Text
+                        style={[styles.breakdownName, { color: colors.textPrimary }]}
+                        numberOfLines={1}
+                      >
+                        {item.name}
+                      </Text>
+                      <Text style={[styles.breakdownMeta, { color: colors.textSecondary }]}>
+                        {item.mastered}/{item.total} done • {item.percent}%
+                      </Text>
+                    </View>
+                    <View style={[styles.miniTrack, { backgroundColor: colors.inputBg }]}>
+                      <View
+                        style={[
+                          styles.miniFill,
+                          { width: `${item.percent}%`, backgroundColor: item.color },
+                        ]}
+                      />
+                    </View>
                   </View>
-                  <View style={[styles.miniTrack, { backgroundColor: colors.inputBg }]}>
-                    <View
-                      style={[
-                        styles.miniFill,
-                        { width: `${item.percent}%`, backgroundColor: item.color },
-                      ]}
-                    />
-                  </View>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
           )}
+
         </GlassCard>
 
         {/* Search & Status Filter Bar */}
