@@ -42,17 +42,37 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>('syllabus');
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    loadInitialState().then((loaded) => {
-      if (!mounted) return;
+  const loadPersistedState = useCallback(async () => {
+    try {
+      const loaded = await loadInitialState();
       setThemeMode(loaded.theme);
       setProfile(loaded.profile);
       setCourses(loaded.courses);
       setMilestones(loaded.milestones);
       setTodos(loaded.todos);
       setHydrated(true);
-    });
+    } catch (err) {
+      console.warn('Failed to load persisted state:', err);
+      setHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    loadInitialState()
+      .then((loaded) => {
+        if (!mounted) return;
+        setThemeMode(loaded.theme);
+        setProfile(loaded.profile);
+        setCourses(loaded.courses);
+        setMilestones(loaded.milestones);
+        setTodos(loaded.todos);
+        setHydrated(true);
+      })
+      .catch((err) => {
+        console.warn('Initial state load failed:', err);
+        if (mounted) setHydrated(true);
+      });
     return () => {
       mounted = false;
     };
@@ -309,4 +329,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
