@@ -26,8 +26,8 @@
       ]
     },
     "plugins": [
-      "expo-file-system"
-      "./plugins/withStudyWidgets",
+      "expo-file-system",
+      "./plugins/withStudyWidgets"
     ],
     "extra": {
       "eas": {
