@@ -32,9 +32,8 @@ export function syncHomeWidgets(
 
   WidgetBridge.updateWidgets(
     examTitle || 'Target Exam',
-    examTimestamp,
+    Number.isNaN(examTimestamp) ? 0 : examTimestamp,
     todoHeader,
     todoBody
   );
 }
-
