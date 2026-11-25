@@ -13,7 +13,7 @@ function withWidgetFiles(config) {
     async (cfg) => {
       const projectRoot = cfg.modRequest.projectRoot;
       const androidResDir = path.join(projectRoot, 'android/app/src/main/res');
-      const pkg = cfg.android?.package || 'com.yourname.studypulse';
+      const pkg = cfg.android?.package || 'com.studypulse.offlinecompanion';
       const pkgPath = path.join(
         projectRoot,
         'android/app/src/main/java',
