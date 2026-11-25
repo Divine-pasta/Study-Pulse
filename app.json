@@ -19,11 +19,20 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.INTERNET"
+      ]
     },
     "plugins": [
-      "expo-file-system"
+      "expo-file-system",
       "./plugins/withStudyWidgets"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ec7f5b15-7bfb-4406-b842-c0906a0ed7ce"
+      }
+    }
   }
 }
-
