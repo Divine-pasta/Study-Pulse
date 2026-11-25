@@ -1,1 +1,40 @@
+import { NativeModules, Platform } from 'react-native';
+
+const { WidgetBridge } = NativeModules;
+
+export interface StudyTask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export function syncHomeWidgets(
+  examTitle: string,
+  examDateIso: string | null,
+  tasks: StudyTask[]
+) {
+  if (Platform.OS !== 'android' || !WidgetBridge) return;
+
+  const examTimestamp = examDateIso ? new Date(examDateIso).getTime() : 0;
+  const pending = tasks.filter((t) => !t.completed);
+
+  const todoHeader =
+    pending.length > 0 ? `To-Do (${pending.length} left)` : 'Study To-Do';
+
+  const todoBody =
+    pending.length === 0
+      ? 'All tasks completed!'
+      : pending
+          .slice(0, 4)
+          .map((t) => `• ${t.title}`)
+          .join('\n') +
+        (pending.length > 4 ? `\n+${pending.length - 4} more` : '');
+
+  WidgetBridge.updateWidgets(
+    examTitle || 'Target Exam',
+    examTimestamp,
+    todoHeader,
+    todoBody
+  );
+}
 
